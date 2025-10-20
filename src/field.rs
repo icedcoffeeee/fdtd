@@ -24,8 +24,8 @@ impl Field {
   // This is where we read the points enclosed by the shape and set the field point values to the
   // set dielectric amount. Suuuper slow, checks each point if inside the region.
   pub fn add_dielectric(mut self, dielectric: Dielectric) -> Self {
-    self.field.iter_mut().for_each(|ps| {
-      ps.iter_mut()
+    self.field.par_iter_mut().for_each(|ps| {
+      ps.par_iter_mut()
         .filter(|p| dielectric.points.point_is_inside(&p.position))
         .for_each(|p| {
           if p.epsilon.abs() == 0. {
@@ -51,8 +51,8 @@ impl Field {
   pub fn at(&self, x: f32, y: f32) -> Point {
     *self
       .field
-      .iter()
-      .map(|ps| ps.iter().find(|p| p.position.y > y))
+      .par_iter()
+      .map(|ps| ps.par_iter().find(|p| p.position.y > y))
       .filter(|ps| ps.is_some())
       .map(|ps| ps.unwrap())
       .find(|ps| ps.position.x > x)

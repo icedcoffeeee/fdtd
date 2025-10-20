@@ -38,4 +38,4 @@ fn main() {
 ### known issues
 
 - adding dielectrics depends on field resolution. 50 points per unit takes
-  nearly a minute on my machine.
+  half a minute on my machine.

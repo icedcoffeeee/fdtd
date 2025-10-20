@@ -2,7 +2,7 @@ use fdtd::*;
 
 fn main() {
   // define bounds of dielectrics
-  let circle = Dielectric::circle(Vec3::ZERO, 5.).with_epsilon(Complex32::new(1.33, 0.));
+  let circle = Dielectric::circle(Vec3::ZERO, 5.).with_epsilon(Complex::new(1.33, 0.));
 
   // define sources
   let source = Source::gaussian(0., 0.2)
