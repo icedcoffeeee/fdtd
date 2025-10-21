@@ -47,16 +47,35 @@ impl Field {
 
   pub fn run<P: AsRef<Path>>(&mut self, save: Option<P>) {}
 
-  /// Returns the nearest field value on the grid
+  /// Returns the interpolated field value on/off the grid
   pub fn at(&self, x: f32, y: f32) -> Point {
-    *self
+    let (ix, (iy, _)) = self
       .field
       .par_iter()
-      .map(|ps| ps.par_iter().find(|p| p.position.y > y))
-      .filter(|ps| ps.is_some())
-      .map(|ps| ps.unwrap())
-      .find(|ps| ps.position.x > x)
-      .expect("point not in field")
+      .enumerate()
+      .map(|(ix, ps)| {
+        (
+          ix,
+          ps.par_iter()
+            .enumerate()
+            .find_first(|(_, p)| p.position.y >= y),
+        )
+      })
+      .filter(|(_, ps)| ps.is_some())
+      .map(|(ix, ps)| (ix, ps.unwrap()))
+      .find_first(|(_, ps)| ps.1.position.x >= x)
+      .expect("point not in field");
+
+    // a -- b
+    // | p  |
+    // c -- d
+    let a = self.field[ix - 1][iy - 1];
+    let b = self.field[ix][iy - 1];
+    let c = self.field[ix - 1][iy];
+    let d = self.field[ix][iy]; // or *p
+
+    let [tx, ty, _] = invlerp!(a.position, Vec3::new(x, y, 0.), d.position).to_array();
+    a.lerp(&c, ty).lerp(&b.lerp(&d, ty), tx)
   }
 
   fn make_field(x_range: Range, y_range: Range) -> Vec<Vec<Point>> {
@@ -65,10 +84,10 @@ impl Field {
     let nx = (x1 - x0) * rx as f32;
     let ny = (y1 - y0) * ry as f32;
 
-    (0..nx as usize)
+    (0..=nx as usize)
       .map(|i| i as f32 / nx)
       .map(|ix| {
-        (0..ny as usize)
+        (0..=ny as usize)
           .map(|i| i as f32 / ny)
           .map(|iy| {
             let x = lerp!(x0, x1, ix);

@@ -15,4 +15,13 @@ impl Point {
     p.position.y = y;
     p
   }
+
+  pub fn lerp(&self, point: &Point, alpha: f32) -> Self {
+    Self {
+      position: lerp!(self.position, point.position, alpha),
+      e_field: lerp!(self.e_field, point.e_field, alpha),
+      b_field: lerp!(self.b_field, point.b_field, alpha),
+      epsilon: lerp!(self.epsilon, point.epsilon, alpha),
+    }
+  }
 }

@@ -11,6 +11,13 @@ macro_rules! lerp {
   };
 }
 
+#[macro_export]
+macro_rules! invlerp {
+  ($a:expr, $b:expr, $c:expr) => {
+    (($b - $a) / ($c - $a))
+  };
+}
+
 pub trait Points {
   fn get_area(&self) -> f32;
   fn points_clockwise(&self) -> bool;
